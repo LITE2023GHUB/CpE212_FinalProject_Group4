@@ -1,0 +1,68 @@
+# Updates repository index and installs Docker if not yet installed
+---
+ - hosts: all
+   become: true
+   pre_tasks:
+
+   - name: update repository index (CentOS)
+     tags: centos
+     package:
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "CentOS"
+
+   - name: update repository index (Ubuntu)
+     tags: ubuntu
+     package:
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "Ubuntu"
+
+   - name: Install Docker (Ubuntu)
+     tags: ubuntu, docker
+     package: 
+       name: docker.io
+       state: latest
+     when: ansible_distribution == "Ubuntu"
+     
+   - name: Install yum utils
+     tags: centos, docker
+     yum:
+       name: yum-utils
+       state: latest
+     when: ansible_distribution == "CentOS"
+
+   - name: Add Docker repo
+     tags: centos, docker
+     get_url:
+       url: https://download.docker.com/linux/centos/docker-ce.repo
+       dest: /etc/yum.repos.d/docer-ce.repo
+     become: yes
+     when: ansible_distribution == "CentOS"
+
+   - name: Install Docker (CentOS)
+     tags: centos, docker
+     package: 
+       name: docker-ce
+       state: latest
+     when: ansible_distribution == "CentOS"
+
+   - name: Start Docker Service
+     tags: docker, ubuntu, centos
+     service:
+       name: docker
+       state: started
+       enabled: true
+
+# roles
+ 
+ - hosts: CentOS
+   become: true
+   roles:
+     - CentOS
+
+ - hosts: Ubuntu
+   become: true
+   roles:
+     - Ubuntu
+
