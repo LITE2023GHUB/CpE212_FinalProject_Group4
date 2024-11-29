@@ -1,0 +1,19 @@
+---
+ - name: Add user to docker group
+   tags: ubuntu, group
+   ansible.builtin.user:
+     name: "{{ ansible_user }}"
+     groups: docker
+     append: true
+
+ - name: newgrp command
+   tags: ubuntu, group
+   meta: reset_connection
+   when: ansible_distribution == "Ubuntu"
+   
+ - name: Pull Docker Image (Ubuntu)
+   tags: image, ubuntu
+   docker_image:
+     name: "khlvn/web-app:latest"
+     source: pull
+   when: ansible_distribution == "Ubuntu"

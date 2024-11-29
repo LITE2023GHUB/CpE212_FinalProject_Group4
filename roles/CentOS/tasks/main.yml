@@ -1,0 +1,19 @@
+---
+ - name: Add user to docker group
+   tags: centos, group
+   ansible.builtin.user:
+     name: "{{ ansible_user }}"
+     groups: docker
+     append: true
+
+ - name: newgrp command
+   tags: centos, group
+   meta: reset_connection
+   when: ansible_distribution == "CentOS"
+
+ - name: Pull Docker Image (CentOS)
+   tags: image, centos
+   docker_image:
+     name: "khlvn/web-app:latest"
+     source: pull
+   when: ansible_distribution == "CentOS"
